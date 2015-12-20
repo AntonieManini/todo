@@ -1,6 +1,6 @@
 package com.anton.todo.domain;
 
-import java.time.LocalDate;
+//import java.time.LocalDate;
 
 public class Task {
 	private int id;
