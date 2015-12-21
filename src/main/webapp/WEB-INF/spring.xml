@@ -25,7 +25,19 @@
 	
 	<bean id="sessionFactory" class="org.springframework.orm.hibernate4.LocalSessionFactoryBean">
 		<property name="dataSource" ref="dataSource" />
-		<property name="configLocation" value="classpath:hibernate.cfg.xml" />
+		<property name="annotatedClasses">
+			<list>
+				<value>com.anton.todo.domain.Task</value>
+			</list>
+		</property>
+		
+		<property name="hibernateProperties">
+			<props>
+				<prop key="hibernate.dialect">org.hibernate.dialect.MySQL5Dialect</prop>
+				<prop key="hibernate.show_sql">true</prop>
+			</props>
+		</property>
+		
 	</bean>
 	
 	<tx:annotation-driven transaction-manager="transactionManager"/>
@@ -33,7 +45,6 @@
 	<bean id="transactionManager" class="org.springframework.orm.hibernate4.HibernateTransactionManager">
 		<property name="sessionFactory" ref="sessionFactory"></property>
 	</bean>
-	
 </beans>
 
 
