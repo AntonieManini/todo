@@ -2,47 +2,46 @@ package com.anton.todo.dao;
 
 import java.util.List;
 
-import javax.sql.DataSource;
-
+import org.hibernate.Criteria;
+import org.hibernate.SessionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jdbc.core.BeanPropertyRowMapper;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.support.JdbcDaoSupport;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.anton.todo.domain.Task;
-import com.anton.todo.util.SQLUtil;
 
 @Repository
 @Transactional
 public class ToDoDAOImpl implements ToDoDAO {
-
-	private JdbcTemplate jdbcTemplate;
-
+	
+	private SessionFactory sessionFactory;
+	
 	@Autowired
-	public void setDataSource(DataSource dataSource) {
-		this.jdbcTemplate = new JdbcTemplate(dataSource);
+	private void setSessionFactory(SessionFactory sessionFactory) {
+		this.sessionFactory = sessionFactory;
 	}
 	
 	public void insert(Task task) {		
-		jdbcTemplate.update(SQLUtil.INSERT, new Object[] {task.getId(), task.getText(), task.isDone(), task.getDate()});
+		sessionFactory.getCurrentSession().persist(task);
+		sessionFactory.getCurrentSession().flush();
 	}
 
 	public void delete(int id) {
-		jdbcTemplate.update(SQLUtil.DELETE, new Object[] {id});
+		Task task = (Task)sessionFactory.getCurrentSession().get(Task.class, id);
+		sessionFactory.getCurrentSession().delete(task);
 	}
 
 	public void update(int id, Task task) {
-		jdbcTemplate.update(SQLUtil.UPDATE, new Object[] {task.getId(), task.getText(), task.isDone(), task.getDate(), id});
+		sessionFactory.getCurrentSession().merge(task);
 	}
 
 	public Task select(int id) {
-		return jdbcTemplate.queryForObject(SQLUtil.SELECT, new BeanPropertyRowMapper(Task.class));
+		return null;
 	}
 
-	public List<Task> selectAll() {
-		return jdbcTemplate.query(SQLUtil.SELECT_ALL, new BeanPropertyRowMapper(Task.class));
+	public List<Task> selectAll() {		
+		 Criteria criteria = sessionFactory.getCurrentSession().createCriteria(Task.class);
+		 return criteria.list();
 	}
 }
 
