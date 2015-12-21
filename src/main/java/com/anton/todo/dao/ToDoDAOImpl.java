@@ -2,6 +2,9 @@ package com.anton.todo.dao;
 
 import java.util.List;
 
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+import javax.persistence.Query;
 import javax.sql.DataSource;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,32 +20,37 @@ import com.anton.todo.util.SQLUtil;
 @Repository
 @Transactional
 public class ToDoDAOImpl implements ToDoDAO {
-
-	private JdbcTemplate jdbcTemplate;
-
-	@Autowired
-	public void setDataSource(DataSource dataSource) {
-		this.jdbcTemplate = new JdbcTemplate(dataSource);
+	private EntityManager em;
+	
+	@PersistenceContext
+	private void setEntityManager(EntityManager em) {
+		this.em = em;
 	}
 	
-	public void insert(Task task) {		
-		jdbcTemplate.update(SQLUtil.INSERT, new Object[] {task.getId(), task.getText(), task.isDone(), task.getDate()});
+	public void insert(Task task) {
+		em.persist(task);
+		em.flush();
 	}
 
 	public void delete(int id) {
-		jdbcTemplate.update(SQLUtil.DELETE, new Object[] {id});
+		Task task = em.find(Task.class, id);
+		
+		em.remove(task);
 	}
 
 	public void update(int id, Task task) {
-		jdbcTemplate.update(SQLUtil.UPDATE, new Object[] {task.getId(), task.getText(), task.isDone(), task.getDate(), id});
+		em.merge(task);
 	}
 
 	public Task select(int id) {
-		return jdbcTemplate.queryForObject(SQLUtil.SELECT, new BeanPropertyRowMapper(Task.class));
+		return null;
 	}
 
 	public List<Task> selectAll() {
-		return jdbcTemplate.query(SQLUtil.SELECT_ALL, new BeanPropertyRowMapper(Task.class));
+		Query query = em.createNativeQuery("SELECT * FROM TASK", Task.class);		
+		List<Task> list = query.getResultList();
+		
+		return list;
 	}
 }
 

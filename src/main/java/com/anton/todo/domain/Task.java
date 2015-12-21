@@ -1,8 +1,16 @@
 package com.anton.todo.domain;
 
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.Table;
+
 //import java.time.LocalDate;
 
+
+@Entity
+@Table
 public class Task {
+	@Id
 	private int id;
 	private String text;
 	private boolean done;
